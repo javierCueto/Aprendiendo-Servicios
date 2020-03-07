@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Alamofire
 
 struct Human: Codable{
     let user: String
@@ -42,33 +43,38 @@ class ViewController: UIViewController {
         }
         
         activityIndicator.startAnimating()
-        URLSession.shared.dataTask(with: endpoint) { (data: Data?, _, error: Error?) in
-            
+        
+        AF.request(endpoint, method: .get, parameters: nil).responseData { (response: AFDataResponse<Data>) in
+
+                
             DispatchQueue.main.async {
                 self.activityIndicator.stopAnimating()
             }
-            
-            if error != nil {
+                
+            if response.error != nil {
                 print("hubo un error")
                 return
             }
-            
-            
-            guard let dataFromService = data,
+                
+                
+            guard let dataFromService = response.data,
                 let model:Human = try? JSONDecoder().decode(Human.self, from: dataFromService) else {
                 return
             }
-            
-            // all called in UI is in the main thread
+                
+                // all called in UI is in the main thread
             DispatchQueue.main.async {
                 let isHappy = model.isHappy
                 self.nameLabel.text = model.user
                 self.statusLabel.text = isHappy ? "Es feliz 😁": "Esta triste 🙁"
             }
-           
-        
+               
             
-        }.resume()
+                
+  
+        }
+        
+        
     }
 
 
